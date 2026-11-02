@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Tic-Tac-Toe with minimax + alpha-beta pruning (Bash)
-# Author: Regis Billings and M365 Copilot (colorless v4)
+# Author: Regis Billings and M365 Copilot (colorless v4), bugfixing by Devon Perry
 # - No ANSI colors; plain ASCII so it renders consistently everywhere.
 # - Portable to Bash 3.x+; avoids echo -e and ${var^^}.
 
@@ -14,7 +14,7 @@ TURN="HUMAN"  # or "AI"
 #License and file integrity check
 
 FILE1="README.txt"
-FILE2="license"
+FILE2="license.dat"
 
 # Verify both files exist
 if [[ -f "$FILE1" && -f "$FILE2" ]]; then
@@ -49,8 +49,8 @@ print_board() {
     i=$((r*3))
     printf "  "
     cell_text $i;        printf " | "
-    cell_text $((i));  printf " | "
-    cell_text $((i+1));  printf "\n"
+    cell_text $((i+1));  printf " | "
+    cell_text $((i+2));  printf "\n"
     if [ $r -lt 2 ]; then
       printf " ---+---+---\n"
     fi
@@ -61,7 +61,7 @@ print_board() {
 # Returns one of: X, O, D (draw), N (no result yet)
 check_winner() {
   local lines=(
-    "0 1 2" "3 4 5"
+    "0 1 2" "3 4 5" "6 7 8"
     "0 3 6" "1 4 7" "2 5 8"
     "0 4 8" "2 4 6"
   )
@@ -101,6 +101,8 @@ minimax() {
     for i in 0 1 2 3 4 5 6 7 8; do
       if [ "${board[$i]}" = " " ]; then
         board[$i]="$AI"
+#above is correct script, below is incorect script that makes it throw the game
+	#board[$i]="$HUMAN"
         read -r score move << EOF
 $(minimax "$nextPlayer" $((depth+1)) "$alpha" "$beta")
 EOF
@@ -145,7 +147,7 @@ EOF
 human_move() {
   local pos idx
   while :; do
-    printf "Your move X. Choose 1-9: " "$HUMAN"
+    printf "Your move $HUMAN. Choose 1-9: " "$HUMAN"
     IFS= read -r pos
     case "$pos" in
       [1-9]) idx=$((pos-1));;
@@ -187,7 +189,7 @@ play_game() {
     winner=$(check_winner)
     if [ "$winner" != "N" ]; then
       case "$winner" in
-        "$HUMAN") printf "You cannot win, human!!!\n\n";;
+        "$HUMAN") printf "Human wins!\n\n";;
         "$AI")    printf "AI wins!\n\n";;
         D)         printf "It's a draw.\n\n";;
       esac
